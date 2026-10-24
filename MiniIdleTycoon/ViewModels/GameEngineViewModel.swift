@@ -12,6 +12,10 @@ final class GameEngineViewModel: ObservableObject {
     @Published private(set) var stations: [Station]
     @Published private(set) var profile: PlayerProfile
 
+    /// Set when the player returns with offline income. Settable so the
+    /// sheet can clear it on dismiss.
+    @Published var offlineEarnings: OfflineEarnings?
+
     /// How often the loop advances the simulation.
     private static let tickInterval: Duration = .milliseconds(100)
 
@@ -46,14 +50,33 @@ final class GameEngineViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Presentation
+
+    var stationRows: [StationRowState] {
+        stations.map { station in
+            let upgradeCost = GameMath.upgradeCost(for: station)
+            let managerCost = GameMath.managerCost(for: station)
+            return StationRowState(station: station,
+                                   revenuePerSecond: GameMath.revenuePerSecond(for: station),
+                                   upgradeCost: upgradeCost,
+                                   managerCost: managerCost,
+                                   canAffordUpgrade: profile.canAfford(upgradeCost),
+                                   canAffordManager: profile.canAfford(managerCost))
+        }
+    }
+
     // MARK: - App Lifecycle
 
     /// Call when the app becomes active (launch or return from background).
-    /// Credits offline earnings first, then resumes the live loop.
-    /// - Returns: The offline earnings, for the "welcome back" sheet.
+    /// Credits offline earnings first, then resumes the live loop. Shows the
+    /// "welcome back" sheet when anything was earned.
     @discardableResult
     func handleAppDidBecomeActive() -> (earnedAmount: Double, timeAway: TimeInterval) {
         let offline = calculateOfflineEarnings()
+        if offline.earnedAmount > 0 {
+            offlineEarnings = OfflineEarnings(earnedAmount: offline.earnedAmount,
+                                              timeAway: offline.timeAway)
+        }
         startGameLoop()
         return offline
     }
