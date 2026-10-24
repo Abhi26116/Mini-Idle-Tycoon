@@ -16,6 +16,21 @@ final class GameEngineViewModel: ObservableObject {
     /// sheet can clear it on dismiss.
     @Published var offlineEarnings: OfflineEarnings?
 
+    /// Seconds left on the rewarded-ad profit boost; `0` when inactive.
+    /// Stored as a duration rather than an end date, so changing the device
+    /// clock can't stretch the boost.
+    @Published private(set) var boostTimeRemaining: TimeInterval = 0
+
+    /// `true` while a rewarded ad is on screen.
+    @Published private(set) var isShowingAd = false
+
+    var isBoostActive: Bool { boostTimeRemaining > 0 }
+
+    /// Applied to every station's revenue: 2× while boosted, otherwise 1×.
+    var revenueMultiplier: Double {
+        isBoostActive ? GameMath.adBoostMultiplier : 1
+    }
+
     /// How often the loop advances the simulation.
     private static let tickInterval: Duration = .milliseconds(100)
 
@@ -27,8 +42,13 @@ final class GameEngineViewModel: ObservableObject {
     /// loses at most this much progress.
     private static let autosaveInterval: TimeInterval = 30
 
+    /// The boost countdown only needs one-second resolution.
+    private static let boostTimerInterval: Duration = .seconds(1)
+
     private let saveManager: SaveManager
+    private let adsManager: any AdsManager
     private var gameLoopTask: Task<Void, Never>?
+    private var boostTimerTask: Task<Void, Never>?
     private var timeSinceAutosave: TimeInterval = 0
 
     /// Wall-clock moment the current state is accurate as of: the baseline for
@@ -37,13 +57,17 @@ final class GameEngineViewModel: ObservableObject {
     private var stateTimestamp: Date?
 
     /// Restores the last save, or starts a new game if there is none.
-    init(saveManager: SaveManager = SaveManager()) {
+    /// - Parameter adsManager: Swap `MockAdsManager` for a real SDK wrapper.
+    init(saveManager: SaveManager = SaveManager(),
+         adsManager: any AdsManager = MockAdsManager()) {
         self.saveManager = saveManager
+        self.adsManager = adsManager
 
         if let save = saveManager.load() {
             stations = save.stations
             profile = save.profile
             stateTimestamp = save.savedAt
+            boostTimeRemaining = save.boostTimeRemaining ?? 0
         } else {
             stations = Station.startingLineup
             profile = PlayerProfile()
@@ -53,11 +77,13 @@ final class GameEngineViewModel: ObservableObject {
     // MARK: - Presentation
 
     var stationRows: [StationRowState] {
-        stations.map { station in
+        let multiplier = revenueMultiplier
+        return stations.map { station in
             let upgradeCost = GameMath.upgradeCost(for: station)
             let managerCost = GameMath.managerCost(for: station)
             return StationRowState(station: station,
-                                   revenuePerSecond: GameMath.revenuePerSecond(for: station),
+                                   revenuePerSecond: GameMath.revenuePerSecond(for: station,
+                                                                               multiplier: multiplier),
                                    upgradeCost: upgradeCost,
                                    managerCost: managerCost,
                                    canAffordUpgrade: profile.canAfford(upgradeCost),
@@ -118,9 +144,13 @@ final class GameEngineViewModel: ObservableObject {
                 self.autosaveIfNeeded(after: elapsed)
             }
         }
+
+        startBoostTimer()
     }
 
+    /// Stops the game loop and the boost timer together.
     func stopGameLoop() {
+        stopBoostTimer()
         guard let gameLoopTask else { return }
         gameLoopTask.cancel()
         self.gameLoopTask = nil
@@ -138,6 +168,7 @@ final class GameEngineViewModel: ObservableObject {
         var updatedStations = stations
         var earned: Double = 0
         var didChange = false
+        let multiplier = revenueMultiplier
 
         for index in updatedStations.indices {
             var station = updatedStations[index]
@@ -148,7 +179,7 @@ final class GameEngineViewModel: ObservableObject {
             didChange = true
 
             if station.currentProgress >= station.processingTimeInSeconds {
-                let revenue = GameMath.revenuePerCycle(for: station)
+                let revenue = GameMath.revenuePerCycle(for: station, multiplier: multiplier)
 
                 if station.hasManager {
                     // Managers chain cycles back to back. Pay every cycle that
@@ -201,6 +232,12 @@ final class GameEngineViewModel: ObservableObject {
         let timeAway = GameMath.creditedOfflineTime(from: lastActive, to: now)
         guard timeAway > 0 else { return (0, 0) }
 
+        // A running boost kept ticking while away: the first `boostedTime`
+        // seconds earn 2×, the rest 1×.
+        let boostedTime = min(boostTimeRemaining, timeAway)
+        let normalTime = timeAway - boostedTime
+        boostTimeRemaining -= boostedTime
+
         var updatedStations = stations
         var earned: Double = 0
 
@@ -210,10 +247,14 @@ final class GameEngineViewModel: ObservableObject {
 
             // Same cycle math as the live loop, so offline pays exactly what
             // the managers would have earned with the app open.
-            let cycles = GameMath.completedCycles(progress: station.currentProgress + timeAway,
-                                                  cycleDuration: station.processingTimeInSeconds)
-            earned += GameMath.revenuePerCycle(for: station) * cycles.count
-            updatedStations[index].currentProgress = cycles.remainder
+            let duration = station.processingTimeInSeconds
+            let boosted = GameMath.completedCycles(progress: station.currentProgress + boostedTime,
+                                                   cycleDuration: duration)
+            let normal = GameMath.completedCycles(progress: boosted.remainder + normalTime,
+                                                  cycleDuration: duration)
+            let revenue = GameMath.revenuePerCycle(for: station)
+            earned += revenue * (boosted.count * GameMath.adBoostMultiplier + normal.count)
+            updatedStations[index].currentProgress = normal.remainder
         }
 
         stations = updatedStations
@@ -233,7 +274,8 @@ final class GameEngineViewModel: ObservableObject {
         }
         saveManager.save(GameSaveData(profile: profile,
                                       stations: stations,
-                                      savedAt: stateTimestamp ?? now))
+                                      savedAt: stateTimestamp ?? now,
+                                      boostTimeRemaining: boostTimeRemaining))
         timeSinceAutosave = 0
     }
 
@@ -246,6 +288,67 @@ final class GameEngineViewModel: ObservableObject {
     /// Moves the offline baseline forward, never back.
     private func advanceStateTimestamp(to date: Date) {
         stateTimestamp = max(stateTimestamp ?? date, date)
+    }
+
+    // MARK: - Monetization
+
+    /// Plays a rewarded ad and activates the profit boost if the player earns
+    /// the reward. Does nothing while an ad is showing or a boost is running.
+    func watchAdForBoost() async {
+        guard !isShowingAd, !isBoostActive else { return }
+
+        isShowingAd = true
+        let rewarded = await adsManager.showRewardedAd()
+        isShowingAd = false
+
+        if rewarded {
+            activateGlobalBoost()
+        }
+    }
+
+    /// Multiplies ALL station revenue by `GameMath.adBoostMultiplier` for
+    /// `GameMath.adBoostDuration`. Activating again resets the countdown.
+    func activateGlobalBoost() {
+        boostTimeRemaining = GameMath.adBoostDuration
+        if gameLoopTask != nil {
+            startBoostTimer()
+        }
+    }
+
+    /// Separate one-second timer that counts the boost down. It runs alongside
+    /// the game loop and stops with it in the background; time away is
+    /// deducted by `calculateOfflineEarnings()` instead.
+    private func startBoostTimer() {
+        guard boostTimerTask == nil, isBoostActive else { return }
+
+        boostTimerTask = Task { [weak self] in
+            let clock = ContinuousClock()
+            var lastTick = clock.now
+
+            while !Task.isCancelled {
+                do {
+                    try await Task.sleep(for: Self.boostTimerInterval)
+                } catch {
+                    break // Cancelled by stopBoostTimer().
+                }
+
+                let now = clock.now
+                let elapsed = lastTick.duration(to: now).timeInterval
+                lastTick = now
+
+                guard let self else { return }
+                self.boostTimeRemaining = max(self.boostTimeRemaining - elapsed, 0)
+                if !self.isBoostActive {
+                    self.boostTimerTask = nil
+                    return
+                }
+            }
+        }
+    }
+
+    private func stopBoostTimer() {
+        boostTimerTask?.cancel()
+        boostTimerTask = nil
     }
 
     // MARK: - Player Actions

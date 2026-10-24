@@ -55,6 +55,15 @@ struct MainGameView: View {
             Label("\(viewModel.profile.premiumGems)", systemImage: "diamond.fill")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.purple)
+
+            ProfitBoostView(
+                timeRemaining: viewModel.boostTimeRemaining,
+                isShowingAd: viewModel.isShowingAd,
+                onWatchAd: { Task { await viewModel.watchAdForBoost() } }
+            )
+            .padding(.horizontal)
+            .padding(.top, 8)
+            .animation(.snappy, value: viewModel.isBoostActive)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

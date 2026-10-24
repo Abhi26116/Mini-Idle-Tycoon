@@ -9,6 +9,9 @@ struct GameSaveData: Codable {
     /// offline earnings. `Date` is an absolute (UTC) instant, so time zones
     /// and daylight saving never affect it.
     var savedAt: Date
+    /// Boost time left as of `savedAt`. Optional so saves made before the
+    /// boost existed still load.
+    var boostTimeRemaining: TimeInterval?
 }
 
 /// Persists the game to `UserDefaults` as a single JSON blob, so the profile,

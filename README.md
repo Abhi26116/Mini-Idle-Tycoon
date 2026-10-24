@@ -13,7 +13,9 @@ MiniIdleTycoon/
 │   ├── PlayerProfile.swift        # Coins & gems wallet
 │   └── OfflineEarnings.swift      # "Welcome back" sheet data
 ├── Services/
-│   └── SaveManager.swift          # UserDefaults persistence
+│   ├── SaveManager.swift          # UserDefaults persistence
+│   ├── AdsManager.swift           # Rewarded-ad protocol (+ async bridge)
+│   └── MockAdsManager.swift       # Fake ad until a real SDK is plugged in
 ├── Utilities/
 │   ├── GameMath.swift             # Cost / revenue / offline formulas
 │   ├── Haptics.swift              # UIImpactFeedbackGenerator wrapper
@@ -24,7 +26,8 @@ MiniIdleTycoon/
 └── Views/
     ├── MainGameView.swift         # Currency header + station list
     ├── StationRowView.swift       # One station card
-    └── OfflineEarningsView.swift  # Offline earnings sheet
+    ├── OfflineEarningsView.swift  # Offline earnings sheet
+    └── ProfitBoostView.swift      # "2X Profit Boost Active" banner / ad button
 ```
 
 ## Using in Xcode
@@ -35,10 +38,20 @@ MiniIdleTycoon/
    navigator, with your app target checked.
 4. Set the deployment target to iOS 17.0 or later, then build and run.
 
+## Plugging in a real ad SDK
+
+Write a class that conforms to `AdsManager` and wraps your SDK's rewarded ad
+(call `completion(true)` only when the reward is earned, and exactly once).
+Then pass it in `MiniIdleTycoonApp.swift`:
+
+```swift
+@StateObject private var viewModel = GameEngineViewModel(adsManager: YourSDKAdsManager())
+```
+
 ## Build phases
 
 1. Models & math ✅
 2. Game engine loop ✅
 3. Offline earnings & persistence ✅
 4. SwiftUI front end ✅
-5. Monetization wrappers
+5. Monetization wrappers ✅

@@ -11,6 +11,12 @@ struct GameMath {
     /// Hiring a manager costs this many times the station's base cost.
     static let managerCostMultiplier: Double = 100
 
+    /// Revenue multiplier while a rewarded-ad boost is running.
+    static let adBoostMultiplier: Double = 2.0
+
+    /// How long one rewarded ad's boost lasts.
+    static let adBoostDuration: TimeInterval = 4 * 60 * 60
+
     private init() {}
 
     // MARK: - Costs
