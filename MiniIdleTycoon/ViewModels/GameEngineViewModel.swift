@@ -19,12 +19,50 @@ final class GameEngineViewModel: ObservableObject {
     /// or app suspension; longer gaps are handled by offline earnings.
     private static let maxTickDelta: TimeInterval = 1.0
 
-    private var gameLoopTask: Task<Void, Never>?
+    /// Saves periodically while playing, so a crash (or hitting Stop in Xcode)
+    /// loses at most this much progress.
+    private static let autosaveInterval: TimeInterval = 30
 
-    init(stations: [Station] = Station.startingLineup,
-         profile: PlayerProfile = PlayerProfile()) {
-        self.stations = stations
-        self.profile = profile
+    private let saveManager: SaveManager
+    private var gameLoopTask: Task<Void, Never>?
+    private var timeSinceAutosave: TimeInterval = 0
+
+    /// Wall-clock moment the current state is accurate as of: the baseline for
+    /// offline earnings. It only ever moves forward, so winding the device
+    /// clock back can't be used to collect the same offline time twice.
+    private var stateTimestamp: Date?
+
+    /// Restores the last save, or starts a new game if there is none.
+    init(saveManager: SaveManager = SaveManager()) {
+        self.saveManager = saveManager
+
+        if let save = saveManager.load() {
+            stations = save.stations
+            profile = save.profile
+            stateTimestamp = save.savedAt
+        } else {
+            stations = Station.startingLineup
+            profile = PlayerProfile()
+        }
+    }
+
+    // MARK: - App Lifecycle
+
+    /// Call when the app becomes active (launch or return from background).
+    /// Credits offline earnings first, then resumes the live loop.
+    /// - Returns: The offline earnings, for the "welcome back" sheet.
+    @discardableResult
+    func handleAppDidBecomeActive() -> (earnedAmount: Double, timeAway: TimeInterval) {
+        let offline = calculateOfflineEarnings()
+        startGameLoop()
+        return offline
+    }
+
+    /// Call when the app moves to the background. Stops the loop, which stamps
+    /// the current time as the offline baseline, then saves.
+    func handleAppDidEnterBackground() {
+        stopGameLoop()
+        saveGame()
     }
 
     // MARK: - Game Loop
@@ -54,13 +92,17 @@ final class GameEngineViewModel: ObservableObject {
 
                 guard let self else { return }
                 self.tick(deltaTime: elapsed)
+                self.autosaveIfNeeded(after: elapsed)
             }
         }
     }
 
     func stopGameLoop() {
-        gameLoopTask?.cancel()
-        gameLoopTask = nil
+        guard let gameLoopTask else { return }
+        gameLoopTask.cancel()
+        self.gameLoopTask = nil
+        // Live simulation ends here; any offline time counts from this moment.
+        advanceStateTimestamp(to: Date())
     }
 
     /// Advances every running station by `deltaTime` seconds and pays out
@@ -88,10 +130,10 @@ final class GameEngineViewModel: ObservableObject {
                 if station.hasManager {
                     // Managers chain cycles back to back. Pay every cycle that
                     // completed and keep the leftover time so nothing is lost.
-                    let cycles = (station.currentProgress / station.processingTimeInSeconds).rounded(.down)
-                    earned += revenue * cycles
-                    station.currentProgress = station.currentProgress
-                        .truncatingRemainder(dividingBy: station.processingTimeInSeconds)
+                    let cycles = GameMath.completedCycles(progress: station.currentProgress,
+                                                          cycleDuration: station.processingTimeInSeconds)
+                    earned += revenue * cycles.count
+                    station.currentProgress = cycles.remainder
                 } else {
                     // No manager: pay out once, then wait for the next tap.
                     earned += revenue
@@ -109,6 +151,78 @@ final class GameEngineViewModel: ObservableObject {
         if earned > 0 {
             profile.addCoins(earned)
         }
+    }
+
+    // MARK: - Offline Earnings
+
+    /// Credits the income managed stations generated while the game wasn't
+    /// running, and adds it to `totalCoins`.
+    ///
+    /// Anti-cheat: time away is never negative (clock wound back), is capped at
+    /// `GameMath.maxOfflineDuration` (clock pushed forward), and the baseline
+    /// only moves forward. Calling this while the live loop is running returns
+    /// zero, so it can never pay for the same time twice.
+    /// - Returns: Coins earned, and the time away that was credited (after the cap).
+    @discardableResult
+    func calculateOfflineEarnings(now: Date = Date()) -> (earnedAmount: Double, timeAway: TimeInterval) {
+        // The live loop is already accounting for time.
+        guard gameLoopTask == nil else { return (0, 0) }
+
+        guard let lastActive = stateTimestamp else {
+            // New game: nothing to catch up on yet.
+            stateTimestamp = now
+            return (0, 0)
+        }
+        advanceStateTimestamp(to: now)
+
+        let timeAway = GameMath.creditedOfflineTime(from: lastActive, to: now)
+        guard timeAway > 0 else { return (0, 0) }
+
+        var updatedStations = stations
+        var earned: Double = 0
+
+        for index in updatedStations.indices {
+            let station = updatedStations[index]
+            guard station.isOwned, station.hasManager else { continue }
+
+            // Same cycle math as the live loop, so offline pays exactly what
+            // the managers would have earned with the app open.
+            let cycles = GameMath.completedCycles(progress: station.currentProgress + timeAway,
+                                                  cycleDuration: station.processingTimeInSeconds)
+            earned += GameMath.revenuePerCycle(for: station) * cycles.count
+            updatedStations[index].currentProgress = cycles.remainder
+        }
+
+        stations = updatedStations
+        if earned > 0 {
+            profile.addCoins(earned)
+        }
+        return (earned, timeAway)
+    }
+
+    // MARK: - Persistence
+
+    func saveGame() {
+        let now = Date()
+        // While the loop runs the state is live, i.e. accurate as of now.
+        if gameLoopTask != nil {
+            advanceStateTimestamp(to: now)
+        }
+        saveManager.save(GameSaveData(profile: profile,
+                                      stations: stations,
+                                      savedAt: stateTimestamp ?? now))
+        timeSinceAutosave = 0
+    }
+
+    private func autosaveIfNeeded(after elapsed: TimeInterval) {
+        timeSinceAutosave += elapsed
+        guard timeSinceAutosave >= Self.autosaveInterval else { return }
+        saveGame()
+    }
+
+    /// Moves the offline baseline forward, never back.
+    private func advanceStateTimestamp(to date: Date) {
+        stateTimestamp = max(stateTimestamp ?? date, date)
     }
 
     // MARK: - Player Actions

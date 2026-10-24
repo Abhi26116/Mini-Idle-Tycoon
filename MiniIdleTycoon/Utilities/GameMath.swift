@@ -45,9 +45,33 @@ struct GameMath {
                         multiplier: multiplier)
     }
 
-    /// Average income per second, used for the "/sec" label and offline earnings.
+    /// Average income per second, used for the "/sec" label.
     static func revenuePerSecond(for station: Station, multiplier: Double = 1) -> Double {
         guard station.processingTimeInSeconds > 0 else { return 0 }
         return revenuePerCycle(for: station, multiplier: multiplier) / station.processingTimeInSeconds
+    }
+
+    // MARK: - Production Cycles
+
+    /// Splits accumulated production time into whole completed cycles plus the
+    /// leftover progress. Shared by the live loop and offline catch-up so both
+    /// pay out identically.
+    static func completedCycles(progress: TimeInterval,
+                                cycleDuration: TimeInterval) -> (count: Double, remainder: TimeInterval) {
+        guard cycleDuration > 0, progress > 0 else { return (0, max(progress, 0)) }
+        let count = (progress / cycleDuration).rounded(.down)
+        return (count, progress.truncatingRemainder(dividingBy: cycleDuration))
+    }
+
+    // MARK: - Offline Progress
+
+    /// Offline income stops accruing after this long away.
+    static let maxOfflineDuration: TimeInterval = 8 * 60 * 60
+
+    /// Time away that earns offline income. Never negative (device clock wound
+    /// back) and capped at `maxOfflineDuration` (clock pushed forward, or just
+    /// a long absence).
+    static func creditedOfflineTime(from lastActive: Date, to now: Date) -> TimeInterval {
+        min(max(now.timeIntervalSince(lastActive), 0), maxOfflineDuration)
     }
 }
