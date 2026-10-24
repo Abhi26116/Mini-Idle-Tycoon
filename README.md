@@ -30,13 +30,22 @@ MiniIdleTycoon/
     └── ProfitBoostView.swift      # "2X Profit Boost Active" banner / ad button
 ```
 
-## Using in Xcode
+## Running on your iPhone
 
-1. Create a new project: **iOS → App**, Interface **SwiftUI**, product name `MiniIdleTycoon`.
-2. Delete the template's `MiniIdleTycoonApp.swift` and `ContentView.swift` (Move to Trash).
-3. Drag everything inside this repo's `MiniIdleTycoon/` folder into the project
-   navigator, with your app target checked.
-4. Set the deployment target to iOS 17.0 or later, then build and run.
+Requires Xcode 16 or later.
+
+1. Open `MiniIdleTycoon.xcodeproj`.
+2. Select the **MiniIdleTycoon** target → **Signing & Capabilities** → pick your
+   Apple ID under **Team** (add it first in Xcode → Settings → Accounts).
+3. Plug in your iPhone, pick it in the device menu at the top, press **⌘R**.
+
+First time on a device: enable **Settings → Privacy & Security → Developer Mode**
+on the iPhone, and after installing, trust your profile under
+**Settings → General → VPN & Device Management**.
+
+The project uses a synchronized folder, so new files added to `MiniIdleTycoon/`
+are picked up automatically. Every push is also built on a macOS runner by
+`.github/workflows/ios-build.yml`.
 
 ## Plugging in a real ad SDK
 
