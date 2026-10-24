@@ -10,8 +10,10 @@ MiniIdleTycoon/
 ├── Models/
 │   ├── Station.swift        # Station data + starting lineup
 │   └── PlayerProfile.swift  # Coins & gems wallet
-└── Utilities/
-    └── GameMath.swift       # Cost / revenue formulas
+├── Utilities/
+│   └── GameMath.swift       # Cost / revenue formulas
+└── ViewModels/
+    └── GameEngineViewModel.swift  # Game loop, purchases, managers
 ```
 
 ## Using in Xcode
@@ -23,7 +25,7 @@ checked.
 ## Build phases
 
 1. Models & math ✅
-2. Game engine loop
+2. Game engine loop ✅
 3. Offline earnings & persistence
 4. SwiftUI front end
 5. Monetization wrappers

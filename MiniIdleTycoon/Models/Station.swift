@@ -21,7 +21,19 @@ struct Station: Identifiable, Codable, Hashable, Sendable {
     /// When `true`, cycles restart automatically and keep earning offline.
     var hasManager: Bool = false
 
+    /// Seconds elapsed in the current production cycle.
+    var currentProgress: TimeInterval = 0
+    /// `true` while a cycle is running. Managed stations never stop;
+    /// unmanaged ones stop after each payout and wait for the player's tap.
+    var isProducing: Bool = false
+
     var isOwned: Bool { currentLevel > 0 }
+
+    /// Current cycle completion from `0.0` to `1.0`, ready for a `ProgressView`.
+    var progressFraction: Double {
+        guard processingTimeInSeconds > 0 else { return 0 }
+        return min(currentProgress / processingTimeInSeconds, 1)
+    }
 }
 
 // MARK: - Starting Lineup
