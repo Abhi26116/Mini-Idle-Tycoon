@@ -3,20 +3,48 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 56;
 	objects = {
+
+/* Begin PBXBuildFile section */
+		1B0000000000000000000103 /* MiniIdleTycoonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000102 /* MiniIdleTycoonApp.swift */; };
+		1B0000000000000000000106 /* OfflineEarnings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000105 /* OfflineEarnings.swift */; };
+		1B0000000000000000000108 /* PlayerProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000107 /* PlayerProfile.swift */; };
+		1B000000000000000000010A /* Station.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000109 /* Station.swift */; };
+		1B000000000000000000010D /* AdsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B000000000000000000010C /* AdsManager.swift */; };
+		1B000000000000000000010F /* MockAdsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B000000000000000000010E /* MockAdsManager.swift */; };
+		1B0000000000000000000111 /* SaveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000110 /* SaveManager.swift */; };
+		1B0000000000000000000114 /* GameMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000113 /* GameMath.swift */; };
+		1B0000000000000000000116 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000115 /* Haptics.swift */; };
+		1B0000000000000000000118 /* NumberFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000117 /* NumberFormatting.swift */; };
+		1B000000000000000000011B /* GameEngineViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B000000000000000000011A /* GameEngineViewModel.swift */; };
+		1B000000000000000000011D /* StationRowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B000000000000000000011C /* StationRowState.swift */; };
+		1B0000000000000000000120 /* MainGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B000000000000000000011F /* MainGameView.swift */; };
+		1B0000000000000000000122 /* OfflineEarningsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000121 /* OfflineEarningsView.swift */; };
+		1B0000000000000000000124 /* ProfitBoostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000123 /* ProfitBoostView.swift */; };
+		1B0000000000000000000126 /* StationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000125 /* StationRowView.swift */; };
+/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1A0000000000000000000001 /* MiniIdleTycoon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniIdleTycoon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B0000000000000000000102 /* MiniIdleTycoonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniIdleTycoonApp.swift; sourceTree = "<group>"; };
+		1B0000000000000000000105 /* OfflineEarnings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineEarnings.swift; sourceTree = "<group>"; };
+		1B0000000000000000000107 /* PlayerProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerProfile.swift; sourceTree = "<group>"; };
+		1B0000000000000000000109 /* Station.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Station.swift; sourceTree = "<group>"; };
+		1B000000000000000000010C /* AdsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsManager.swift; sourceTree = "<group>"; };
+		1B000000000000000000010E /* MockAdsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAdsManager.swift; sourceTree = "<group>"; };
+		1B0000000000000000000110 /* SaveManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveManager.swift; sourceTree = "<group>"; };
+		1B0000000000000000000113 /* GameMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameMath.swift; sourceTree = "<group>"; };
+		1B0000000000000000000115 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		1B0000000000000000000117 /* NumberFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberFormatting.swift; sourceTree = "<group>"; };
+		1B000000000000000000011A /* GameEngineViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngineViewModel.swift; sourceTree = "<group>"; };
+		1B000000000000000000011C /* StationRowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationRowState.swift; sourceTree = "<group>"; };
+		1B000000000000000000011F /* MainGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainGameView.swift; sourceTree = "<group>"; };
+		1B0000000000000000000121 /* OfflineEarningsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineEarningsView.swift; sourceTree = "<group>"; };
+		1B0000000000000000000123 /* ProfitBoostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfitBoostView.swift; sourceTree = "<group>"; };
+		1B0000000000000000000125 /* StationRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationRowView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		1A0000000000000000000002 /* MiniIdleTycoon */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MiniIdleTycoon;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		1A0000000000000000000003 /* Frameworks */ = {
@@ -32,7 +60,7 @@
 		1A0000000000000000000004 = {
 			isa = PBXGroup;
 			children = (
-				1A0000000000000000000002 /* MiniIdleTycoon */,
+				1B0000000000000000000101 /* MiniIdleTycoon */,
 				1A0000000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +71,69 @@
 				1A0000000000000000000001 /* MiniIdleTycoon.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		1B0000000000000000000101 /* MiniIdleTycoon */ = {
+			isa = PBXGroup;
+			children = (
+				1B0000000000000000000102 /* MiniIdleTycoonApp.swift */,
+				1B0000000000000000000104 /* Models */,
+				1B000000000000000000010B /* Services */,
+				1B0000000000000000000112 /* Utilities */,
+				1B0000000000000000000119 /* ViewModels */,
+				1B000000000000000000011E /* Views */,
+			);
+			path = MiniIdleTycoon;
+			sourceTree = "<group>";
+		};
+		1B0000000000000000000104 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1B0000000000000000000105 /* OfflineEarnings.swift */,
+				1B0000000000000000000107 /* PlayerProfile.swift */,
+				1B0000000000000000000109 /* Station.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		1B000000000000000000010B /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				1B000000000000000000010C /* AdsManager.swift */,
+				1B000000000000000000010E /* MockAdsManager.swift */,
+				1B0000000000000000000110 /* SaveManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		1B0000000000000000000112 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				1B0000000000000000000113 /* GameMath.swift */,
+				1B0000000000000000000115 /* Haptics.swift */,
+				1B0000000000000000000117 /* NumberFormatting.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		1B0000000000000000000119 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				1B000000000000000000011A /* GameEngineViewModel.swift */,
+				1B000000000000000000011C /* StationRowState.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		1B000000000000000000011E /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				1B000000000000000000011F /* MainGameView.swift */,
+				1B0000000000000000000121 /* OfflineEarningsView.swift */,
+				1B0000000000000000000123 /* ProfitBoostView.swift */,
+				1B0000000000000000000125 /* StationRowView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -60,12 +151,7 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				1A0000000000000000000002 /* MiniIdleTycoon */,
-			);
 			name = MiniIdleTycoon;
-			packageProductDependencies = (
-			);
 			productName = MiniIdleTycoon;
 			productReference = 1A0000000000000000000001 /* MiniIdleTycoon.app */;
 			productType = "com.apple.product-type.application";
@@ -77,15 +163,16 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1600;
-				LastUpgradeCheck = 1600;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
 				TargetAttributes = {
 					1A0000000000000000000006 = {
-						CreatedOnToolsVersion = 16.0;
+						CreatedOnToolsVersion = 15.2;
 					};
 				};
 			};
 			buildConfigurationList = 1A000000000000000000000A /* Build configuration list for PBXProject "MiniIdleTycoon" */;
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -93,8 +180,6 @@
 				Base,
 			);
 			mainGroup = 1A0000000000000000000004;
-			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 1A0000000000000000000005 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -119,6 +204,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B0000000000000000000103 /* MiniIdleTycoonApp.swift in Sources */,
+				1B0000000000000000000106 /* OfflineEarnings.swift in Sources */,
+				1B0000000000000000000108 /* PlayerProfile.swift in Sources */,
+				1B000000000000000000010A /* Station.swift in Sources */,
+				1B000000000000000000010D /* AdsManager.swift in Sources */,
+				1B000000000000000000010F /* MockAdsManager.swift in Sources */,
+				1B0000000000000000000111 /* SaveManager.swift in Sources */,
+				1B0000000000000000000114 /* GameMath.swift in Sources */,
+				1B0000000000000000000116 /* Haptics.swift in Sources */,
+				1B0000000000000000000118 /* NumberFormatting.swift in Sources */,
+				1B000000000000000000011B /* GameEngineViewModel.swift in Sources */,
+				1B000000000000000000011D /* StationRowState.swift in Sources */,
+				1B0000000000000000000120 /* MainGameView.swift in Sources */,
+				1B0000000000000000000122 /* OfflineEarningsView.swift in Sources */,
+				1B0000000000000000000124 /* ProfitBoostView.swift in Sources */,
+				1B0000000000000000000126 /* StationRowView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,6 +275,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 46SSZ8CCPX;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Idle Tycoon";
@@ -198,6 +300,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 46SSZ8CCPX;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Idle Tycoon";

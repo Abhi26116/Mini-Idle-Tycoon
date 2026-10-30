@@ -32,7 +32,8 @@ MiniIdleTycoon/
 
 ## Running on your iPhone
 
-Requires Xcode 16 or later.
+Requires Xcode 15 or later. To run on a device, your Xcode must also support
+the iPhone's iOS version.
 
 1. Open `MiniIdleTycoon.xcodeproj`.
 2. Select the **MiniIdleTycoon** target → **Signing & Capabilities** → pick your
@@ -43,8 +44,8 @@ First time on a device: enable **Settings → Privacy & Security → Developer M
 on the iPhone, and after installing, trust your profile under
 **Settings → General → VPN & Device Management**.
 
-The project uses a synchronized folder, so new files added to `MiniIdleTycoon/`
-are picked up automatically. Every push is also built on a macOS runner by
+The project lists its source files explicitly (so it opens in Xcode 15), so add
+new files through Xcode's File → New → File… to include them in the target. Every push is also built on a macOS runner by
 `.github/workflows/ios-build.yml`.
 
 ## Plugging in a real ad SDK

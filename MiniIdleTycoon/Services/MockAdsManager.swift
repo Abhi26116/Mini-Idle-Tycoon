@@ -10,7 +10,7 @@ final class MockAdsManager: AdsManager {
     /// - Parameters:
     ///   - adDuration: How long the fake ad "plays".
     ///   - grantsReward: Set to `false` to test the skipped/failed-ad path.
-    init(adDuration: Duration = .seconds(2), grantsReward: Bool = true) {
+    nonisolated init(adDuration: Duration = .seconds(2), grantsReward: Bool = true) {
         self.adDuration = adDuration
         self.grantsReward = grantsReward
     }
