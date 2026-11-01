@@ -19,7 +19,7 @@ MiniIdleTycoon/
 ├── Utilities/
 │   ├── GameMath.swift             # Cost / revenue / offline formulas
 │   ├── Haptics.swift              # UIImpactFeedbackGenerator wrapper
-│   └── NumberFormatting.swift     # 12345 → "12.35K"
+│   └── NumberFormatting.swift     # 12350 → "12.35K"
 ├── ViewModels/
 │   ├── GameEngineViewModel.swift  # Game loop, purchases, offline earnings
 │   └── StationRowState.swift      # Precomputed per-row display state
@@ -28,6 +28,8 @@ MiniIdleTycoon/
     ├── StationRowView.swift       # One station card
     ├── OfflineEarningsView.swift  # Offline earnings sheet
     └── ProfitBoostView.swift      # "2X Profit Boost Active" banner / ad button
+
+MiniIdleTycoonTests/               # XCTest unit tests (math, models, engine, saves)
 ```
 
 ## Running on your iPhone
@@ -45,8 +47,19 @@ on the iPhone, and after installing, trust your profile under
 **Settings → General → VPN & Device Management**.
 
 The project lists its source files explicitly (so it opens in Xcode 15), so add
-new files through Xcode's File → New → File… to include them in the target. Every push is also built on a macOS runner by
+new files through Xcode's File → New → File… to include them in the target. Every push is also built and tested on a macOS runner by
 `.github/workflows/ios-build.yml`.
+
+## Running the tests
+
+In Xcode press **⌘U**. From the command line:
+
+```bash
+xcodebuild test -project MiniIdleTycoon.xcodeproj -scheme MiniIdleTycoon -destination 'platform=iOS Simulator,name=<your simulator>'
+```
+
+New test files go in `MiniIdleTycoonTests/`; add them to the **MiniIdleTycoonTests**
+target via File → New → File… so the project picks them up.
 
 ## Plugging in a real ad SDK
 

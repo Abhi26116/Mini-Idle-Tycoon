@@ -4,7 +4,7 @@ extension Double {
     private static let suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]
 
     /// Compact display for idle-game numbers:
-    /// `950` → "950", `4.6` → "4.6", `12_345` → "12.35K", `5.6e9` → "5.6B".
+    /// `950` → "950", `4.6` → "4.6", `12_350` → "12.35K", `5.6e9` → "5.6B".
     var abbreviated: String {
         guard isFinite else { return "∞" }
         // Compare the rounded value, so 999.96 shows as "1K" rather than "1,000".

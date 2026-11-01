@@ -10,11 +10,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build for iOS Simulator
+      - name: Build and test on iOS Simulator
         run: |
-          xcodebuild build \
+          # Use whichever iPhone simulator this runner's Xcode ships with.
+          DEVICE_ID=$(xcrun simctl list devices available -j \
+            | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print(next(x["udid"] for r,v in d.items() if "iOS" in r for x in v if "iPhone" in x["name"]))')
+          xcodebuild test \
             -project MiniIdleTycoon.xcodeproj \
-            -target MiniIdleTycoon \
-            -sdk iphonesimulator \
-            -configuration Debug \
+            -scheme MiniIdleTycoon \
+            -destination "id=$DEVICE_ID" \
             CODE_SIGNING_ALLOWED=NO
