@@ -24,11 +24,19 @@ final class GameEngineViewModel: ObservableObject {
     /// `true` while a rewarded ad is on screen.
     @Published private(set) var isShowingAd = false
 
+    /// How many levels each "Upgrade" tap buys.
+    @Published var buyMode: BuyMode = .one
+
     var isBoostActive: Bool { boostTimeRemaining > 0 }
 
-    /// Applied to every station's revenue: 2× while boosted, otherwise 1×.
+    /// Permanent bonus from claimed investors.
+    var investorMultiplier: Double {
+        GameMath.investorMultiplier(investors: profile.investors)
+    }
+
+    /// Applied to every station's revenue: investors × (2× while boosted).
     var revenueMultiplier: Double {
-        isBoostActive ? GameMath.adBoostMultiplier : 1
+        investorMultiplier * (isBoostActive ? GameMath.adBoostMultiplier : 1)
     }
 
     /// How often the loop advances the simulation.
@@ -79,17 +87,23 @@ final class GameEngineViewModel: ObservableObject {
     var stationRows: [StationRowState] {
         let multiplier = revenueMultiplier
         return stations.map { station in
-            let upgradeCost = GameMath.upgradeCost(for: station)
+            // In Max mode with nothing affordable, preview the price of one level.
+            let upgradeCount = max(levelsToBuy(for: station), 1)
+            let upgradeCost = GameMath.bulkUpgradeCost(for: station, count: upgradeCount)
             let managerCost = GameMath.managerCost(for: station)
             return StationRowState(station: station,
                                    revenuePerSecond: GameMath.revenuePerSecond(for: station,
                                                                                multiplier: multiplier),
+                                   upgradeCount: upgradeCount,
                                    upgradeCost: upgradeCost,
                                    managerCost: managerCost,
                                    canAffordUpgrade: profile.canAfford(upgradeCost),
                                    canAffordManager: profile.canAfford(managerCost))
         }
     }
+
+    /// Investors the player would gain by prestiging now.
+    var claimableInvestors: Int { profile.claimableInvestors }
 
     // MARK: - App Lifecycle
 
@@ -252,7 +266,7 @@ final class GameEngineViewModel: ObservableObject {
                                                    cycleDuration: duration)
             let normal = GameMath.completedCycles(progress: boosted.remainder + normalTime,
                                                   cycleDuration: duration)
-            let revenue = GameMath.revenuePerCycle(for: station)
+            let revenue = GameMath.revenuePerCycle(for: station, multiplier: investorMultiplier)
             earned += revenue * (boosted.count * GameMath.adBoostMultiplier + normal.count)
             updatedStations[index].currentProgress = normal.remainder
         }
@@ -362,21 +376,32 @@ final class GameEngineViewModel: ObservableObject {
         stations[index].isProducing = true
     }
 
-    /// Buys the station (level 0 → 1) or upgrades it one level, deducting
-    /// `GameMath.upgradeCost`.
+    /// Buys the station (level 0 → 1) or upgrades it, as many levels as
+    /// `buyMode` says, deducting `GameMath.bulkUpgradeCost`. A fixed count is
+    /// all or nothing; Max buys whatever is affordable.
     /// - Returns: `true` on success, so the UI can fire haptics only then.
     @discardableResult
     func upgradeStation(id: Station.ID) -> Bool {
         guard let index = stationIndex(for: id) else { return false }
 
-        let cost = GameMath.upgradeCost(for: stations[index])
+        let count = levelsToBuy(for: stations[index])
+        guard count > 0 else { return false }
+        let cost = GameMath.bulkUpgradeCost(for: stations[index], count: count)
         // Check first: calling a mutating method on a @Published value
         // republishes even when nothing changes.
         guard profile.canAfford(cost) else { return false }
 
         profile.spendCoins(cost)
-        stations[index].currentLevel += 1
+        stations[index].currentLevel += count
         return true
+    }
+
+    /// Levels the next upgrade tap would buy: the mode's fixed count, or for
+    /// Max as many as the player can afford (possibly 0).
+    private func levelsToBuy(for station: Station) -> Int {
+        buyMode.fixedCount ?? GameMath.maxAffordableLevels(baseCost: station.baseCost,
+                                                            currentLevel: station.currentLevel,
+                                                            coins: profile.totalCoins)
     }
 
     /// Hires a manager for an owned station. The manager starts producing
@@ -395,6 +420,25 @@ final class GameEngineViewModel: ObservableObject {
         stations[index].hasManager = true
         stations[index].isProducing = true
         return true
+    }
+
+    // MARK: - Prestige
+
+    /// Sells the studio: claims every available investor, then restarts with
+    /// the starting lineup and no coins. Investors, lifetime earnings, gems
+    /// and any running boost carry over. Saves immediately so a crash can't
+    /// undo the reset (or hand the investors out twice).
+    /// - Returns: Investors gained; `0` (and no reset) when none are available.
+    @discardableResult
+    func prestige() -> Int {
+        let gained = profile.claimableInvestors
+        guard gained > 0 else { return 0 }
+
+        profile.investors += gained
+        profile.totalCoins = 0
+        stations = Station.startingLineup
+        saveGame()
+        return gained
     }
 
     // MARK: - Helpers

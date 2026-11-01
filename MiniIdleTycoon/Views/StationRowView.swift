@@ -43,6 +43,12 @@ struct StationRowView: View {
                     }
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                    if station.isOwned, let milestone = row.nextMilestone {
+                        Label("×2 profit at Lv \(milestone)", systemImage: "star.fill")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.orange)
+                    }
                 }
             }
 
@@ -78,7 +84,7 @@ struct StationRowView: View {
     private var upgradeButton: some View {
         Button(action: onUpgrade) {
             VStack(spacing: 2) {
-                Text(station.isOwned ? "Upgrade" : "Buy")
+                Text(upgradeTitle)
                     .font(.subheadline.bold())
                 costLabel(row.upgradeCost)
             }
@@ -108,6 +114,12 @@ struct StationRowView: View {
 
     // MARK: - Display Helpers
 
+    /// "Buy", "Upgrade", or "Upgrade ×10" when buying several levels.
+    private var upgradeTitle: String {
+        let verb = station.isOwned ? "Upgrade" : "Buy"
+        return row.upgradeCount > 1 ? "\(verb) ×\(row.upgradeCount)" : verb
+    }
+
     private var statusText: String {
         if !station.isOwned { return "Not purchased" }
         if station.hasManager { return "Managed" }
@@ -135,15 +147,15 @@ struct StationRowView: View {
     managed.currentProgress = 1.8
 
     return VStack(spacing: 12) {
-        StationRowView(row: StationRowState(station: lineup[0], revenuePerSecond: 1,
+        StationRowView(row: StationRowState(station: lineup[0], revenuePerSecond: 1, upgradeCount: 1,
                                             upgradeCost: 4.6, managerCost: 400,
                                             canAffordUpgrade: true, canAffordManager: false),
                        onRun: {}, onUpgrade: {}, onHireManager: {})
-        StationRowView(row: StationRowState(station: managed, revenuePerSecond: 240,
+        StationRowView(row: StationRowState(station: managed, revenuePerSecond: 240, upgradeCount: 10,
                                             upgradeCost: 321, managerCost: 6_000,
                                             canAffordUpgrade: true, canAffordManager: true),
                        onRun: {}, onUpgrade: {}, onHireManager: {})
-        StationRowView(row: StationRowState(station: lineup[2], revenuePerSecond: 0,
+        StationRowView(row: StationRowState(station: lineup[2], revenuePerSecond: 0, upgradeCount: 1,
                                             upgradeCost: 720, managerCost: 72_000,
                                             canAffordUpgrade: false, canAffordManager: false),
                        onRun: {}, onUpgrade: {}, onHireManager: {})

@@ -3,10 +3,18 @@ import SwiftUI
 /// The single game screen: currency header on top, station cards below.
 struct MainGameView: View {
     @ObservedObject var viewModel: GameEngineViewModel
+    @State private var isShowingPrestige = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
+                Picker("Buy amount", selection: $viewModel.buyMode) {
+                    ForEach(BuyMode.allCases) { mode in
+                        Text(mode.label).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+
                 ForEach(viewModel.stationRows) { row in
                     StationRowView(
                         row: row,
@@ -33,6 +41,16 @@ struct MainGameView: View {
         .sheet(item: $viewModel.offlineEarnings) { earnings in
             OfflineEarningsView(earnings: earnings)
         }
+        .sheet(isPresented: $isShowingPrestige) {
+            PrestigeView(investors: viewModel.profile.investors,
+                         claimableInvestors: viewModel.claimableInvestors,
+                         lifetimeCoins: viewModel.profile.lifetimeCoins,
+                         onSell: {
+                             if viewModel.prestige() > 0 {
+                                 Haptics.purchaseSucceeded()
+                             }
+                         })
+        }
     }
 
     private var header: some View {
@@ -52,9 +70,21 @@ struct MainGameView: View {
             .font(.system(size: 40, weight: .bold, design: .rounded))
             .monospacedDigit()
 
-            Label("\(viewModel.profile.premiumGems)", systemImage: "diamond.fill")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.purple)
+            HStack(spacing: 16) {
+                Label("\(viewModel.profile.premiumGems)", systemImage: "diamond.fill")
+                    .foregroundStyle(.purple)
+
+                Button {
+                    isShowingPrestige = true
+                } label: {
+                    Label(investorsText, systemImage: "person.3.fill")
+                        .foregroundStyle(.teal)
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Shows investors and the option to sell your studio")
+            }
+            .font(.subheadline.weight(.semibold))
+            .monospacedDigit()
 
             ProfitBoostView(
                 timeRemaining: viewModel.boostTimeRemaining,
@@ -68,6 +98,13 @@ struct MainGameView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
         .background(.bar)
+    }
+
+    /// e.g. "12" or "12 (+30)" when more investors can be claimed.
+    private var investorsText: String {
+        let claimable = viewModel.claimableInvestors
+        let owned = "\(viewModel.profile.investors)"
+        return claimable > 0 ? "\(owned) (+\(claimable))" : owned
     }
 }
 

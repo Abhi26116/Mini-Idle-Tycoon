@@ -10,27 +10,40 @@ MiniIdleTycoon/
 ├── MiniIdleTycoonApp.swift        # @main entry, ScenePhase → save / offline earnings
 ├── Models/
 │   ├── Station.swift              # Station data + starting lineup
-│   ├── PlayerProfile.swift        # Coins & gems wallet
+│   ├── PlayerProfile.swift        # Coins, gems, investors & lifetime earnings
 │   └── OfflineEarnings.swift      # "Welcome back" sheet data
 ├── Services/
 │   ├── SaveManager.swift          # UserDefaults persistence
 │   ├── AdsManager.swift           # Rewarded-ad protocol (+ async bridge)
 │   └── MockAdsManager.swift       # Fake ad until a real SDK is plugged in
 ├── Utilities/
-│   ├── GameMath.swift             # Cost / revenue / offline formulas
+│   ├── GameMath.swift             # Cost, bulk-buy, milestone, investor, offline formulas
 │   ├── Haptics.swift              # UIImpactFeedbackGenerator wrapper
 │   └── NumberFormatting.swift     # 12350 → "12.35K"
 ├── ViewModels/
-│   ├── GameEngineViewModel.swift  # Game loop, purchases, offline earnings
+│   ├── BuyMode.swift              # ×1 / ×10 / ×100 / Max upgrade amount
+│   ├── GameEngineViewModel.swift  # Game loop, purchases, prestige, offline earnings
 │   └── StationRowState.swift      # Precomputed per-row display state
 └── Views/
     ├── MainGameView.swift         # Currency header + station list
     ├── StationRowView.swift       # One station card
     ├── OfflineEarningsView.swift  # Offline earnings sheet
+    ├── PrestigeView.swift         # "Sell your studio" investors sheet
     └── ProfitBoostView.swift      # "2X Profit Boost Active" banner / ad button
 
 MiniIdleTycoonTests/               # XCTest unit tests (math, models, engine, saves)
 ```
+
+## Progression
+
+- **Milestones:** a station's revenue doubles at levels 10, 25, 50, 100, 150,
+  200, 300, 400 and 500 (`GameMath.milestoneLevels`).
+- **Bulk buy:** the ×1 / ×10 / ×100 / Max picker sets how many levels one
+  Upgrade tap buys. Fixed amounts are all-or-nothing; Max buys what you can afford.
+- **Investors (prestige):** lifetime earnings attract investors
+  (`√(lifetime coins / 1M)` in total). Selling the studio claims them and
+  restarts the stations and coins; each investor adds +2% to all profit forever.
+  Investors, lifetime earnings, gems and an active boost carry over.
 
 ## Running on your iPhone
 
@@ -78,3 +91,4 @@ Then pass it in `MiniIdleTycoonApp.swift`:
 3. Offline earnings & persistence ✅
 4. SwiftUI front end ✅
 5. Monetization wrappers ✅
+6. Progression: milestones, bulk buy, prestige ✅

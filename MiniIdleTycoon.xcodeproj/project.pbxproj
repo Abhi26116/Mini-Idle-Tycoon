@@ -28,6 +28,9 @@
 		1C0000000000000000000015 /* GameEngineViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0000000000000000000014 /* GameEngineViewModelTests.swift */; };
 		1C0000000000000000000017 /* SaveManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0000000000000000000016 /* SaveManagerTests.swift */; };
 		1C0000000000000000000019 /* NumberFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0000000000000000000018 /* NumberFormattingTests.swift */; };
+		1B0000000000000000000128 /* BuyMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000127 /* BuyMode.swift */; };
+		1B000000000000000000012A /* PrestigeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000129 /* PrestigeView.swift */; };
+		1C000000000000000000001B /* ProgressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C000000000000000000001A /* ProgressionTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +57,9 @@
 		1C0000000000000000000014 /* GameEngineViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngineViewModelTests.swift; sourceTree = "<group>"; };
 		1C0000000000000000000016 /* SaveManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveManagerTests.swift; sourceTree = "<group>"; };
 		1C0000000000000000000018 /* NumberFormattingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberFormattingTests.swift; sourceTree = "<group>"; };
+		1B0000000000000000000127 /* BuyMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuyMode.swift; sourceTree = "<group>"; };
+		1B0000000000000000000129 /* PrestigeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrestigeView.swift; sourceTree = "<group>"; };
+		1C000000000000000000001A /* ProgressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,6 +155,7 @@
 		1B0000000000000000000119 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				1B0000000000000000000127 /* BuyMode.swift */,
 				1B000000000000000000011A /* GameEngineViewModel.swift */,
 				1B000000000000000000011C /* StationRowState.swift */,
 			);
@@ -160,6 +167,7 @@
 			children = (
 				1B000000000000000000011F /* MainGameView.swift */,
 				1B0000000000000000000121 /* OfflineEarningsView.swift */,
+				1B0000000000000000000129 /* PrestigeView.swift */,
 				1B0000000000000000000123 /* ProfitBoostView.swift */,
 				1B0000000000000000000125 /* StationRowView.swift */,
 			);
@@ -173,6 +181,7 @@
 				1C0000000000000000000010 /* GameMathTests.swift */,
 				1C0000000000000000000012 /* ModelTests.swift */,
 				1C0000000000000000000018 /* NumberFormattingTests.swift */,
+				1C000000000000000000001A /* ProgressionTests.swift */,
 				1C0000000000000000000016 /* SaveManagerTests.swift */,
 			);
 			path = MiniIdleTycoonTests;
@@ -292,6 +301,8 @@
 				1B0000000000000000000122 /* OfflineEarningsView.swift in Sources */,
 				1B0000000000000000000124 /* ProfitBoostView.swift in Sources */,
 				1B0000000000000000000126 /* StationRowView.swift in Sources */,
+				1B000000000000000000012A /* PrestigeView.swift in Sources */,
+				1B0000000000000000000128 /* BuyMode.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,6 +315,7 @@
 				1C0000000000000000000015 /* GameEngineViewModelTests.swift in Sources */,
 				1C0000000000000000000017 /* SaveManagerTests.swift in Sources */,
 				1C0000000000000000000019 /* NumberFormattingTests.swift in Sources */,
+				1C000000000000000000001B /* ProgressionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
