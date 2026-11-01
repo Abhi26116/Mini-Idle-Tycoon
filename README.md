@@ -9,6 +9,8 @@ A SwiftUI idle tycoon (theme: Startup Studio) built with MVVM and Swift Concurre
 MiniIdleTycoon/
 ├── MiniIdleTycoonApp.swift        # @main entry, ScenePhase → save / offline earnings
 ├── Assets.xcassets/               # App icon
+├── Info.plist                     # Ad IDs, ATT text, SKAdNetwork (merged with the generated plist)
+├── PrivacyInfo.xcprivacy          # Privacy manifest for the app's own code
 ├── Models/
 │   ├── Station.swift              # Station data + starting lineup
 │   ├── PlayerProfile.swift        # Coins, gems, investors & lifetime earnings
@@ -16,7 +18,8 @@ MiniIdleTycoon/
 ├── Services/
 │   ├── SaveManager.swift          # UserDefaults persistence
 │   ├── AdsManager.swift           # Rewarded-ad protocol (+ async bridge)
-│   └── MockAdsManager.swift       # Fake ad until a real SDK is plugged in
+│   ├── GoogleAdsManager.swift     # AdMob rewarded ads + UMP consent + ATT
+│   └── MockAdsManager.swift       # Fake ad for tests and previews
 ├── Utilities/
 │   ├── GameMath.swift             # Cost, bulk-buy, milestone, investor, offline formulas
 │   ├── Haptics.swift              # UIImpactFeedbackGenerator wrapper
@@ -88,15 +91,33 @@ This overwrites `MiniIdleTycoon/Assets.xcassets/AppIcon.appiconset/AppIcon.png`
 (1024×1024, opaque; Xcode makes the smaller sizes). To use your own artwork
 instead, drop a 1024×1024 PNG without transparency in its place.
 
-## Plugging in a real ad SDK
+## Ads (Google AdMob)
 
-Write a class that conforms to `AdsManager` and wraps your SDK's rewarded ad
-(call `completion(true)` only when the reward is earned, and exactly once).
-Then pass it in `MiniIdleTycoonApp.swift`:
+Rewarded ads use the Google Mobile Ads SDK (Swift Package, pinned to 13.10.0).
+On launch `GoogleAdsManager` runs Google's required order: consent form (UMP,
+only where the law requires it) → App Tracking Transparency prompt → SDK start →
+preload an ad. The boost is granted only when the player earns the reward and
+closes the ad. Unit tests use `MockAdsManager` and never start the SDK.
 
-```swift
-@StateObject private var viewModel = GameEngineViewModel(adsManager: YourSDKAdsManager())
-```
+**Before release**, replace Google's public test IDs with your own from the
+AdMob console (Apps → your app → App settings, and Ad units → your rewarded unit).
+They are build settings on the **MiniIdleTycoon** target (Build Settings →
+User-Defined), so Debug can keep the test IDs:
+
+| Setting | Test value (current) |
+| --- | --- |
+| `GAD_APPLICATION_ID` | `ca-app-pub-3940256099942544~1458002511` |
+| `REWARDED_AD_UNIT_ID` | `ca-app-pub-3940256099942544/1712485313` |
+
+Never tap your own live ads; use test IDs or register your iPhone as a test
+device in AdMob. Also in the AdMob console, set up the **Privacy & messaging**
+GDPR and IDFA messages. `Info.plist` lists Google's
+[SKAdNetwork IDs](https://developers.google.com/admob/ios/3p-skadnetworks);
+refresh them from that page now and then.
+
+To use a different ad network, write a class that conforms to `AdsManager`
+(call `completion(true)` only when the reward is earned, and exactly once) and
+create it in `MiniIdleTycoonApp.init()` instead of `GoogleAdsManager`.
 
 ## Build phases
 
@@ -104,5 +125,5 @@ Then pass it in `MiniIdleTycoonApp.swift`:
 2. Game engine loop ✅
 3. Offline earnings & persistence ✅
 4. SwiftUI front end ✅
-5. Monetization wrappers ✅
+5. Monetization wrappers ✅ (Google AdMob rewarded ads, UMP consent, ATT)
 6. Progression: milestones, bulk buy, prestige ✅
