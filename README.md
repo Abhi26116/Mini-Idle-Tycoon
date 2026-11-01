@@ -8,6 +8,7 @@ A SwiftUI idle tycoon (theme: Startup Studio) built with MVVM and Swift Concurre
 ```
 MiniIdleTycoon/
 ├── MiniIdleTycoonApp.swift        # @main entry, ScenePhase → save / offline earnings
+├── Assets.xcassets/               # App icon
 ├── Models/
 │   ├── Station.swift              # Station data + starting lineup
 │   ├── PlayerProfile.swift        # Coins, gems, investors & lifetime earnings
@@ -32,6 +33,7 @@ MiniIdleTycoon/
     └── ProfitBoostView.swift      # "2X Profit Boost Active" banner / ad button
 
 MiniIdleTycoonTests/               # XCTest unit tests (math, models, engine, saves)
+Scripts/generate_app_icon.swift    # Redraws the app icon PNG
 ```
 
 ## Progression
@@ -73,6 +75,18 @@ xcodebuild test -project MiniIdleTycoon.xcodeproj -scheme MiniIdleTycoon -destin
 
 New test files go in `MiniIdleTycoonTests/`; add them to the **MiniIdleTycoonTests**
 target via File → New → File… so the project picks them up.
+
+## App icon
+
+The icon is drawn in code so it can be tweaked and regenerated:
+
+```bash
+swift Scripts/generate_app_icon.swift
+```
+
+This overwrites `MiniIdleTycoon/Assets.xcassets/AppIcon.appiconset/AppIcon.png`
+(1024×1024, opaque; Xcode makes the smaller sizes). To use your own artwork
+instead, drop a 1024×1024 PNG without transparency in its place.
 
 ## Plugging in a real ad SDK
 
